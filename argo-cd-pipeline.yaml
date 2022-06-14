@@ -103,6 +103,7 @@ argo test:
     - chmod +x /usr/local/bin/argocd
     # Stream pod logs.
     - mkdir -p "${CI_PROJECT_DIR}/logs"
+    - env
     - stern "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}" --namespace "${KUBE_NAMESPACE}"
       --color never --tail=1 --exclude "[^""]*""[^""]*""\s[2-3]{1}[0-9]{2}"
       -l pipeline_id="${CI_PIPELINE_ID}" | tee "${CI_PROJECT_DIR}/logs/application.logs" &
