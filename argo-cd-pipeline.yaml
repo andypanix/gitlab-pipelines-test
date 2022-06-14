@@ -80,31 +80,11 @@ cache: &global_cache
   policy: pull
 
 # --------------
-# POPULATE CACHE
-# --------------
-clone automation repo:
-  stage: populate cache
-  script:
-    # Clone automation repo and store his files for next build step using Kaniko.
-    - git clone ${AUTOMATION_REPO_GIT_URL} ${AUTOMATION_REPO_DIR}
-    - cd ${AUTOMATION_REPO_DIR}
-    - git checkout master --
-  cache:
-    # inherit all global cache settings
-    <<: *global_cache
-    # override the policy
-    policy: push
-  artifacts:
-    expire_in: 60 mins
-    paths:
-      - ${AUTOMATION_REPO_DIR}
-
-# --------------
 # TEST
 # --------------
 # See https://argoproj.github.io/argo-cd/user-guide/ci_automation/ for reference.
 argo test:
-  stage: deploy
+  stage: .pre
   environment:
     name: ${ENVIRONMENT_SCOPE_PREFIX}/${CI_COMMIT_REF_SLUG}
     url: https://${CI_COMMIT_REF_SLUG}.${CI_PROJECT_NAME}.${KUBE_INGRESS_BASE_DOMAIN}
@@ -132,6 +112,26 @@ argo test:
     expire_in: 1 week
     paths:
       - ${CI_PROJECT_DIR}/logs
+
+# --------------
+# POPULATE CACHE
+# --------------
+clone automation repo:
+  stage: populate cache
+  script:
+    # Clone automation repo and store his files for next build step using Kaniko.
+    - git clone ${AUTOMATION_REPO_GIT_URL} ${AUTOMATION_REPO_DIR}
+    - cd ${AUTOMATION_REPO_DIR}
+    - git checkout master --
+  cache:
+    # inherit all global cache settings
+    <<: *global_cache
+    # override the policy
+    policy: push
+  artifacts:
+    expire_in: 60 mins
+    paths:
+      - ${AUTOMATION_REPO_DIR}
 
 # --------------
 # BUILD
